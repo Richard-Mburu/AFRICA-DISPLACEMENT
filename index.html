@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Africa Displacement Flow Monitor</title>
+  
+  <!-- CDNs for CSS styling -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+  <div class="dashboard-container">
+    
+    <!-- Top Header Navigation -->
+    <header>
+      <div class="brand-section">
+        <i class="fa-solid fa-earth-africa brand-logo"></i>
+        <div>
+          <h1>AFRICA DISPLACEMENT FLOW MONITOR</h1>
+          <div class="brand-sub">HUMANITARIAN DATA OPERATIONS CENTER</div>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button class="btn-secondary analytics-toggle" id="analytics-toggle" onclick="toggleAnalyticsPanel()" aria-expanded="false" aria-controls="analytics-panel">
+          <i class="fa-solid fa-chart-line"></i> Analytics
+        </button>
+        <div class="theme-switch-container" onclick="toggleTheme()">
+          <span id="theme-label"><i class="fa-solid fa-moon"></i> Dark Theme</span>
+          <button class="theme-btn" id="theme-toggle" aria-label="Toggle Light/Dark Theme"></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Left Sidebar: Key Stat Cards & Lists -->
+    <aside class="left-panel">
+      <!-- Total Displaced Metric -->
+      <div class="metric-card">
+        <div class="card-title">
+          <i class="fa-solid fa-users"></i> Total Displaced Population
+        </div>
+        <div class="card-value highlighted" id="stat-total-displaced">0</div>
+        <div class="card-subtitle" id="stat-latest-date-label">Reporting Period: Loading...</div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="stats-grid">
+        <div class="metric-card">
+          <div class="card-title">
+            <i class="fa-solid fa-plane-departure"></i> Origins
+          </div>
+          <div class="card-value" id="stat-total-origins">0</div>
+          <div class="card-subtitle">Source Countries</div>
+        </div>
+        <div class="metric-card">
+          <div class="card-title">
+            <i class="fa-solid fa-plane-arrival"></i> Destinations
+          </div>
+          <div class="card-value" id="stat-total-destinations">0</div>
+          <div class="card-subtitle">Host Countries</div>
+        </div>
+      </div>
+
+      <!-- Corridor Card -->
+      <div class="metric-card">
+        <div class="card-title">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i> Largest Corridor
+        </div>
+        <div class="card-value" id="stat-largest-corridor" style="font-size: 16px; margin: 4px 0; font-weight:600; line-height:1.2;">None</div>
+        <div class="card-subtitle" id="stat-largest-corridor-val">0 individuals</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="card-title">
+          <i class="fa-solid fa-arrow-trend-up"></i> Fastest Growing Corridor
+        </div>
+        <div class="card-value" id="stat-fastest-corridor" style="font-size: 16px; margin: 4px 0; font-weight:600; line-height:1.2;">None</div>
+        <div class="card-subtitle" id="stat-fastest-corridor-val">0 change</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="card-title">
+          <i class="fa-solid fa-scale-balanced"></i> Strongest Net Change
+        </div>
+        <div class="card-value" id="stat-net-country" style="font-size: 16px; margin: 4px 0; font-weight:600; line-height:1.2;">None</div>
+        <div class="card-subtitle" id="stat-net-country-val">0 net displacement</div>
+      </div>
+
+      <!-- Top Destinations Table -->
+      <div class="list-section">
+        <div class="section-title">Top 10 Host Countries</div>
+        <div class="scrollable-list" id="top-destinations-list">
+          <div style="color: var(--text-muted); font-size:13px; padding: 10px;">Loading data...</div>
+        </div>
+      </div>
+
+      <!-- Top Origins Table -->
+      <div class="list-section">
+        <div class="section-title">Top 10 Countries of Origin</div>
+        <div class="scrollable-list" id="top-origins-list">
+          <div style="color: var(--text-muted); font-size:13px; padding: 10px;">Loading data...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Section: Map & Floating Controls -->
+    <main class="map-panel">
+      <!-- Leaflet Map Container -->
+      <div id="map"></div>
+      <div id="map-legend" class="map-legend"></div>
+
+      <!-- Floating Controls Panel -->
+      <div class="floating-filters">
+        <!-- Visual Mode selector -->
+        <div class="filter-group" style="flex: 1 1 200px;">
+          <label>Map View Mode</label>
+          <div class="viz-mode-toggle">
+            <button class="mode-btn active" onclick="changeVizMode('flow')" id="btn-mode-flow">Flows</button>
+            <button class="mode-btn" onclick="changeVizMode('incoming')" id="btn-mode-incoming">Incoming</button>
+            <button class="mode-btn" onclick="changeVizMode('outgoing')" id="btn-mode-outgoing">Outgoing</button>
+            <button class="mode-btn" onclick="changeVizMode('net')" id="btn-mode-net">Net Change</button>
+            <button class="mode-btn" onclick="changeVizMode('topCorridors')" id="btn-mode-top">Top Corridors</button>
+          </div>
+        </div>
+
+        <!-- Destination Filter -->
+        <div class="filter-group">
+          <label for="filter-destination"><i class="fa-solid fa-location-dot"></i> Host Country</label>
+          <select id="filter-destination" onchange="applyFilters()">
+            <option value="all">All Host Countries</option>
+          </select>
+        </div>
+
+        <!-- Origin Filter -->
+        <div class="filter-group">
+          <label for="filter-origin"><i class="fa-solid fa-house-chimney-crack"></i> Country of Origin</label>
+          <select id="filter-origin" onchange="applyFilters()">
+            <option value="all">All Origins</option>
+          </select>
+        </div>
+
+        <!-- Population Type Filter -->
+        <div class="filter-group">
+          <label for="filter-pop-type"><i class="fa-solid fa-person-circle-exclamation"></i> Population Type</label>
+          <select id="filter-pop-type" onchange="applyFilters()">
+            <option value="all">All Types</option>
+          </select>
+        </div>
+
+        <div class="filter-group range-filter">
+          <label for="filter-start-date"><i class="fa-solid fa-calendar-days"></i> From Month</label>
+          <select id="filter-start-date" onchange="applyFilters()">
+            <option value="all">All Dates</option>
+          </select>
+        </div>
+
+        <div class="filter-group range-filter">
+          <label for="filter-end-date"><i class="fa-solid fa-calendar-check"></i> To Month</label>
+          <select id="filter-end-date" onchange="applyFilters()">
+            <option value="all">All Dates</option>
+          </select>
+        </div>
+
+        <!-- Minimum Individuals Threshold Filter -->
+        <div class="filter-group">
+          <label for="filter-threshold">Min Individuals: <span id="threshold-val">0</span></label>
+          <input type="range" id="filter-threshold" min="0" max="50000" step="500" value="0" oninput="updateThresholdLabel(this.value)" onchange="applyFilters()">
+        </div>
+
+        <!-- Filter Action Button -->
+        <div class="filter-btn-group">
+          <button class="btn-secondary" onclick="resetFilters()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        </div>
+      </div>
+
+      <!-- Timeline Overlay Control -->
+      <div class="timeline-panel">
+        <div class="timeline-header">
+          <div class="timeline-current-date" id="timeline-display-date">
+            <i class="fa-solid fa-clock"></i> <span>Loading timeline...</span>
+          </div>
+          
+          <div class="timeline-player-controls">
+            <button class="player-btn" onclick="timelineStepBack()" title="Step Backward"><i class="fa-solid fa-backward-step"></i></button>
+            <button class="player-btn btn-play-pause" id="btn-play-timeline" onclick="toggleTimelinePlay()" title="Play / Pause"><i class="fa-solid fa-play"></i></button>
+            <button class="player-btn" onclick="timelineStepForward()" title="Step Forward"><i class="fa-solid fa-forward-step"></i></button>
+          </div>
+        </div>
+
+        <div class="timeline-slider-row">
+          <span class="slider-date-label" id="timeline-start-label">Start</span>
+          <input type="range" class="timeline-slider" id="timeline-slider" min="0" max="0" value="0" oninput="onTimelineSliderChange(this.value)">
+          <span class="slider-date-label right-label" id="timeline-end-label">End</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Sidebar: Interactive Analytics Charts -->
+    <aside class="right-panel" id="analytics-panel" aria-hidden="true">
+      <button class="btn-secondary panel-close" onclick="toggleAnalyticsPanel(false)" aria-label="Close analytics panel">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+      <!-- Top Host Countries Chart -->
+      <div class="chart-container">
+        <div class="section-title">Host Country Distribution</div>
+        <div class="chart-wrapper">
+          <canvas id="chart-destinations"></canvas>
+        </div>
+      </div>
+
+      <!-- Top Origins Chart -->
+      <div class="chart-container">
+        <div class="section-title">Origin Country Distribution</div>
+        <div class="chart-wrapper">
+          <canvas id="chart-origins"></canvas>
+        </div>
+      </div>
+
+      <!-- Population Type Doughnut Chart -->
+      <div class="chart-container">
+        <div class="section-title">Population Type Breakdown</div>
+        <div class="chart-wrapper">
+          <canvas id="chart-pop-types"></canvas>
+        </div>
+      </div>
+
+      <!-- Trend Over Time Line Chart -->
+      <div class="chart-container">
+        <div class="section-title">Monthly Trend of Displacement</div>
+        <div class="chart-wrapper">
+          <canvas id="chart-trend"></canvas>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Leaflet and Plugins JS CDN imports -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet.polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+  <!-- Application script files -->
+  <script src="country-centroids.js"></script>
+  <script src="unhcr-situations-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
