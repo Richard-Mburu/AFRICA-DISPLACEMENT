@@ -1,0 +1,152 @@
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+*.pem
+*.key
+*.crt
+*.p12
+
+# API Keys & Credentials
+credentials.json
+secrets.json
+config-secrets.js
+api-keys.js
+auth-tokens.txt
+.credentials
+
+# Node & Package Management
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+yarn.lock.bak
+.npmrc
+.yarnrc
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.eclipse
+.classpath
+.project
+*.iml
+*.iws
+*.ipr
+
+# OS Files
+Thumbs.db
+Desktop.ini
+.Spotlight-V100
+.Trashes
+._*
+.AppleDouble
+
+# Build & Compilation
+dist/
+build/
+out/
+*.map
+*.min.js
+*.min.css
+
+# Logs & Temp Files
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.mdb
+data/local.db
+
+# Cache Files
+.cache/
+.eslintcache
+.prettierignore
+.swcache
+
+# Testing
+coverage/
+.nyc_output/
+.jest_cache/
+test-results/
+
+# Sensitive Data & Personal Info
+private/
+sensitive/
+config/local.js
+local-config.json
+user-data/
+backup-data/
+*.xlsx.bak
+*.csv.bak
+*.backup
+
+# Dependency Lock Files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+
+# OS Artifacts
+.vscode-test
+.vscode-settings
+*.code-workspace
+
+# Third-party Libraries (if storing locally)
+lib/external/
+vendor/
+plugins/
+
+# System Backups
+*.orig
+*.bak
+*.tmp
+*~
+*.swp
+
+# Configuration Files with Secrets
+config.local.js
+settings.local.js
+database.config.js
+
+# Temporary Development Files
+debug.log
+.parcel-cache/
+
+# Docker & Container
+.docker/
+docker-compose.override.yml
+.dockerignore
+
+# CI/CD Files (if applicable)
+.github/workflows/secrets
+.gitlab-ci-variables
+
+# Analytics & Tracking
+*.plist
+.amplitude
+.mixpanel
+
+# Misc Sensitive Files
+.htpasswd
+.htaccess-local
+*/secrets/*
+*/private/*
+.ssh/
+.gnupg/
